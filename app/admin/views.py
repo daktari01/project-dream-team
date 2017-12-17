@@ -27,7 +27,7 @@ def list_departments():
 
     departments = Department.query.all()
 
-    return render_template('admin/departments.html', departments=departments, 
+    return render_template('admin/departments/departments.html', departments=departments, 
                                                         title="Departments")
 
 @admin.route('/departments/add', methods=['GET', 'POST'])
