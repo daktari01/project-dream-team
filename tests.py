@@ -60,7 +60,7 @@ class TestModels(TestBase):
 
         # Save department to database
         db.session.add(department)
-        db.commit()
+        db.session.commit()
 
         self.assertEqual(Department.query.count(), 1)
 
@@ -75,7 +75,7 @@ class TestModels(TestBase):
         db.session.add(role)
         db.session.commit()
 
-        self.assertEqual(Role.query.conut(), 1)
+        self.assertEqual(Role.query.count(), 1)
 
 class TestViews(TestBase):
 
