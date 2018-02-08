@@ -1,4 +1,4 @@
-# tests.py
+# tests/test_back_end.py
 
 import os
 import unittest
@@ -23,6 +23,8 @@ class TestBase(TestCase):
         """
         Will be called before every test
         """
+        db.session.commit()
+        db.drop_all()
         db.create_all()
 
         # Create test admin user
