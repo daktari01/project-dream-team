@@ -7,7 +7,7 @@ from flask_testing import LiveServerTestCase
 from selenium import webdriver
 
 from app import create_app, db
-from app.models import Employee, Role, Deparment
+from app.models import Employee, Role, Department
 
 # Set test variables for test admin user
 test_admin_username = "admin"
@@ -50,7 +50,7 @@ class TestBase(LiveServerTestCase):
         app = create_app(config_name)
         app.config.update(
             # Specify the test database
-            SQLALCHEMY_DATABASE_URI="mysql://dt_admin:admin2016@localhost/dreamteam_test"
+            SQLALCHEMY_DATABASE_URI="mysql://dt_admin:dt2016@localhost/dreamteam_test",
             # Change the port that the liveserver listens to 
             LIVESERVER_PORT=8943
             )
@@ -98,7 +98,7 @@ class TestBase(LiveServerTestCase):
         
     def test_server_is_up_and_running(self):
         response = urllib2.urlopen(self.get_server_url())
-        self.assertEqual(response_code, 200)
+        self.assertEqual(response.code, 200)
 
 
 if __name__ == '__main__':
