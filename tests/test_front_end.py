@@ -46,24 +46,6 @@ test_role1_description = "Lead the entire department"
 test_role2_name = "Intern"
 test_role2_description = "3-Month learning position"
 
-class CreateObjects(object):
-
-    def login_admin_user(self):
-        """Log in as the test admin"""
-        login_link = self.get_server_url() + url_for('auth,login')
-        self.driver.get(login_link)
-        self.driver.find_element_by_id("password").send_keys(
-            test_admin_password)
-        self.driver.find_element_by_id("submit").click()
-
-    def login_test_user(self):
-        """Log in as the test employee"""
-        login_link = self.get_server_url() + url_for('auth.login')
-        self.driver.get(login_link)
-        self.driver.find_element_by_id("email").send_keys(test_employee1_email)
-        self.driver.find_element_by_id("password").send_keys(test_employee1_password)
-        self.driver.find_element_by_id("submit").click()
-
 class TestBase(LiveServerTestCase):
     def create_app(self):
         config_name = 'testing'
@@ -119,6 +101,26 @@ class TestBase(LiveServerTestCase):
     def test_server_is_up_and_running(self):
         response = urllib2.urlopen(self.get_server_url())
         self.assertEqual(response.code, 200)
+
+class CreateObjects(object, TestBase):
+
+    def login_admin_user(self):
+        """Log in as the test admin"""
+        login_link = self.get_server_url() + url_for('auth,login')
+        self.driver.get(login_link)
+        self.driver.find_element_by_id("email").send_keys(test_admin_email)
+        self.driver.find_element_by_id("password").send_keys(
+            test_admin_password)
+        self.driver.find_element_by_id("submit").click()
+
+    def login_test_user(self):
+        """Log in as the test employee"""
+        login_link = self.get_server_url() + url_for('auth.login')
+        self.driver.get(login_link)
+        self.driver.find_element_by_id("email").send_keys(test_employee1_email)
+        self.driver.find_element_by_id("password").send_keys(
+            test_employee1_password)
+        self.driver.find_element_by_id("submit").click()
 
 class TestRegistration(TestBase):
 
@@ -332,6 +334,126 @@ class TestLogin(TestBase):
         # Assert that error message is shown
         error_message = self.driver.find_element_by_class_name("alert").text
         assert "Invalid email or password" in error_message
+
+class TestDepartments(CreateObjects, TestBase):
+
+    def test_add_department(self):
+        """
+        Test that an admin user can add a department
+        """
+
+        # Login as admin user
+        self.login_admin_user()
+
+        # Click departments menu link
+        self.driver.find_element_by_id("departments_link").click()
+        time.sleep(1)
+
+        # Click on add department button
+        self.driver.find_element_by_class_name("btn").click()
+        time.sleep(1)
+
+        # Fill in add department form
+        self.driver.find_element_by_id("name").send_keys(test_department2_name)
+        self.driver.find_element_by_id("description").send_keys(
+            test_department2_description)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+
+        # Assert success message is shown
+        success_message = self.driver.find_element_by_class_name("alert").text
+        assert "You have successfully added a new department" in success_message
+
+        # Assert that there are now 2 departments in the database
+        self.assertEqual(Department.query.count(), 2)
+
+    def test_add_existing_department(self):
+        """
+        Test that an admin user cannot add a department with a name 
+        that already exists
+        """
+
+        # Login as admin user
+        self.login_admin_user()
+
+        # Click departments menu link
+        self.driver.find_element_by_id("departments_link").click()
+        time.sleep(1)
+
+        # Click on add department button
+        self.driver.find_element_by_class_name("btn").click()
+        time.sleep(1)
+
+        # Fill in add department form
+        self.driver.find_element_by_id("name").send_keys(test_department1_name)
+        self.driver.find_element_by_id("description").send_keys(test_department1_description)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+
+        # Assert error message is shown
+        error_message = self.driver.find_element_by_class_name("alert").text
+        assert "Error: department name already exists" in error_message
+
+        # Assert that there is still only 1 department in the database
+        self.assertEqual(Department.query.count(), 1)
+
+    def test_edit_department(self):
+        """
+        Test that an admin user can edit a department
+        """
+
+        # Login as admin user
+        self.login_admin_user()
+
+        # Click departments menu link
+        self.driver.find_element_by_id("departments_link").click()
+        time.sleep(1)
+
+        # Click on edit department link
+        self.driver.find_element_by_class_name("fa-pencil").click()
+        time.sleep(1)
+
+        # Fill in add department form
+        self.driver.find_element_by_id("name").clear()
+        self.driver.find_element_by_id("name").send_keys("Edited name")
+        self.driver.find_element_by_id("description").clear()
+        self.driver.find_element_by_id("description").send_keys(
+            "Edited description")
+        self.driver.find_element_by_id("sublit").click()
+        time.sleep(2)
+
+        # Assert  success message is shown
+        success_message = self.driver.find_element_by_class_name("alert").text
+        assert "You have successfully edited the department" in success_message
+
+        # Assert that department name and description has changed
+        department = Department.query.get(1)
+        self.assertEqual(department.name, "Edited name")
+        self.assertEqual(department.description, "Edited description")
+
+    def test_delete_department(self):
+        """
+        Test that an admin user can delete a department
+        """
+
+        # Login as admin user
+        self.login_admin_user()
+
+        # Click departments menu link
+        self.driver.find_element_by_id("departments_link").click()
+        time.sleep(1)
+
+        # Click on delete department link
+        self.driver.find_element_by_class_name("fa-trash").click()
+        time.sleep(1)
+
+        # Assert success message is shown
+        success_message = self.driver.find_element_by_class_name("alert").text
+        assert "You have successfully deleted the department" in success_message
+
+        # Assert that there is no departments in the database
+        self.assertEqual(Department.query.count(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
