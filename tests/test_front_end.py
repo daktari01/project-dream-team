@@ -454,6 +454,125 @@ class TestDepartments(CreateObjects, TestBase):
         # Assert that there is no departments in the database
         self.assertEqual(Department.query.count(), 0)
 
+class TestRole(CreateObjects, TestBase):
+    
+    def test_add_role(self):
+        """
+        Test that an admin user can add a role
+        """
+        
+        # Login as admin
+        self.login_admin_user()
+        
+        # Click roles menu link
+        self.driver.find_element_by_id("roles_link").click
+        time.sleep(1)
+        
+        # Click on add role button
+        self.driver.find_element_by_class_name("btn").click()
+        time.sleep(1)
+        
+        # Fill in add role form 
+        self.driver.find_element_by_id("name").send_keys(test_role2_name)
+        self.driver.find_element_by_id("description").send_keys(
+            test_role2_description)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+        
+        # Assert success message is shown
+        success_message = self.driver.find_element_by_class_name("alert").text 
+        assert "You have successfully added a new role" in success_message
+        
+        # Assert that there are now 2 roles in the database
+        self.assertEqual(Role.query.count(), 2)
+        
+    def test_add_existing_role(self):
+        """
+        Test that admin cannot add a role with a name
+        that already exists
+        """
+        
+        # Login as admin
+        self.login_admin_user
+        
+        # Click roles menu link
+        self.driver.find_element_by_id("roles_link").click()
+        time.sleep(1)
+        
+        # Click on add role button
+        self.driver.find_element_by_class_name("btn").click()
+        time.sleep(1)
+        
+        # Fill in add role form
+        self.driver.find_element_by_id("name").send_keys(test_role1_name)
+        self.driver.find_element_by_id("description").send_keys(
+            test_role1_description)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+        
+        # Assert error message is shown
+        error_message = self.driver.find_element_by_class_name("alert").text
+        assert "Error: role name already exists" in error_message
+        
+        # Asset that there is still only 1 role in the database
+        self.assertEqual(Role.query.count(), 1)
+        
+    def test_edit_role(self):
+        """
+        Test that an admin user can edit a role
+        """
+        
+        # Login as admin user
+        self.login_admin_user()
+        
+        # Click roles menu link
+        self.driver.find_element_by_id("roles_link").click()
+        time.sleep(1)
+        
+        # Click on edit role link
+        self.driver.find_element_by_class_name("fa-pencil")
+        time.sleep(1)
+        
+        # Fill in add role form
+        self.driver.find_element_by_id("name").clear()
+        self.driver.find_element_by_id("name").send_keys("Edited name")
+        self.driver.find_element_by_id("description").clear()
+        self.driver.find_element_by_id("description").send_keys(
+            "Edited description")
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+        
+        # Assert success message is shown
+        success_message = self.driver.find_element_by_class_name("alert").text 
+        assert "You have successfully edited the role" in success_message
+        
+        # Assert that role name and description have changed
+        role = Role.query.get(1)
+        self.assertEqual(role.name, "Edited name")
+        self.assertEqual(role.description, "Edited description")
+        
+    def test_delete_role(self):
+        """
+        Test that admin user can delete a role
+        """
+        
+        # Login as admin user
+        self.login_admin_user()
+        
+        # Click roles menu link
+        self.driver.find_element_by_id("roles_link").click()
+        time.sleep(1)
+        
+        # Click on delete role link
+        self.driver.find_element_by_class_name("fa-trash").click()
+        time.sleep(1)
+        
+        # Assert success message is shown
+        success_message = self.driver.find_element_by_class_name("alert").text 
+        assert "Yu have successfully deleted the role" in success_message
+        
+        # Assert there are no roles in the database
+        self.assertEqual(Role.query.count(), 0)
 
 if __name__ == '__main__':
     unittest.main()
