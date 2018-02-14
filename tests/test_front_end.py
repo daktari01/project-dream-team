@@ -134,8 +134,8 @@ class TestRegistration(TestBase):
         assert url_for('auth.login') in self.driver.current_url
 
         # Assert success message is shown
-        success_message = self.driver.find_element_by_id("alert").text 
-        assert "Tou have been successfully registered" in success_message
+        success_message = self.driver.find_element_by_class_name("alert").text 
+        assert "You have successfully registered" in success_message
 
         # Assert that there are now 3 employees in the database
         self.assertEqual(Employee.query.count(), 3)
