@@ -52,6 +52,7 @@ def add_department():
             flash('You have successfully added a new department.')
         except:
             # in case department name already exists
+            db.session.rollback()
             flash('Error: department name already exists')
 
         # redirect to departments page
@@ -141,6 +142,7 @@ def add_role():
             flash('You have successfully added a new role')
         except:
             # in case role name already exists
+            db.session.rollback()
             flash('Error: role name already exists.')
         
         # redirect to the roles page
