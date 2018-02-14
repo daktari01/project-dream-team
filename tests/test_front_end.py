@@ -104,7 +104,7 @@ class TestBase(LiveServerTestCase):
 
 class TestRegistration(TestBase):
 
-    def test_regitration(self):
+    def test_registration(self):
         """
         Test that a user can create an account using the registration form
         if all fields are field correctly, and that they will be 
@@ -140,65 +140,180 @@ class TestRegistration(TestBase):
         # Assert that there are now 3 employees in the database
         self.assertEqual(Employee.query.count(), 3)
 
-        def test_registration_invalid_email(self):
-            """
-            Test that a user cannot register using an invalid email format
-            and that an appropriate error message will be displayed
-            """
+    def test_registration_invalid_email(self):
+        """
+        Test that a user cannot register using an invalid email format
+        and that an appropriate error message will be displayed
+        """
 
-            # Click register menu link
-            self.driver.find_element_by_id("register_link").click()
-            time.sleep(1)
+        # Click register menu link
+        self.driver.find_element_by_id("register_link").click()
+        time.sleep(1)
 
-            # Fill in registration form
-            self.driver.find_element_by_id("email").send_keys("invalid_email")
-            self.driver.find_element_by_id("username").send_keys(
-                test_employee2_username)
-            self.driver.find_element_by_id("first_name").send_keys(
-                test_employee2_first_name)
-            self.driver.find_element_by_id("last_name").send_keys(
-                test_employee2_last_name)
-            self.driver.find_element_by_id("password").send_keys(
-                test_employee2_password)
-            self.driver.find_element_by_id("confirm_password").send_keys(
-                test_employee2_password)
-            self.driver.find_element_by_id("submit").click()
-            time.sleep(5)
+        # Fill in registration form
+        self.driver.find_element_by_id("email").send_keys("invalid_email")
+        self.driver.find_element_by_id("username").send_keys(
+            test_employee2_username)
+        self.driver.find_element_by_id("first_name").send_keys(
+            test_employee2_first_name)
+        self.driver.find_element_by_id("last_name").send_keys(
+            test_employee2_last_name)
+        self.driver.find_element_by_id("password").send_keys(
+            test_employee2_password)
+        self.driver.find_element_by_id("confirm_password").send_keys(
+            test_employee2_password)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(5)
 
-            # Assert error message is shown
-            error_message = self.driver.find_element_by_class_name(
-                "help-block").text 
-            assert "Invalid email address" in error_message
+        # Assert error message is shown
+        error_message = self.driver.find_element_by_class_name(
+            "help-block").text 
+        assert "Invalid email address" in error_message
 
-        def test_registration_confirm_password(self):
-            """
-            Test that an appropriate error message is displayed when the 
-            password and confirm password fields do not match
-            """
+    def test_registration_confirm_password(self):
+        """
+        Test that an appropriate error message is displayed when the 
+        password and confirm password fields do not match
+        """
 
-            # Click register menu link
-            self.driver.find_element_by_id("register_link").click()
-            time.sleep(1)
+        # Click register menu link
+        self.driver.find_element_by_id("register_link").click()
+        time.sleep(1)
 
-            # Fill in registration form
-            self.driver.find_element_by_id("email").send_keys(test_employee2_email)
-            self.driver.find_element_by_id("username").send_keys(
-                test_employee2_username)
-            self.driver.find_element_by_id("first_name").send_keys(
-                test_employee2_first_name)
-            self.driver.find_element_by_id("last_name").send_keys(
-                test_employee2_last_name)
-            self.driver.find_element_by_id("password").send_keys(
-                test_employee2_password)
-            self.driver.find_element_by_id("confirm_password").send_keys(
-                "password-won't-match")
-            self.driver.find_element_by_id("submit").click()
-            time.sleep(5)
+        # Fill in registration form
+        self.driver.find_element_by_id("email").send_keys(test_employee2_email)
+        self.driver.find_element_by_id("username").send_keys(
+            test_employee2_username)
+        self.driver.find_element_by_id("first_name").send_keys(
+            test_employee2_first_name)
+        self.driver.find_element_by_id("last_name").send_keys(
+            test_employee2_last_name)
+        self.driver.find_element_by_id("password").send_keys(
+            test_employee2_password)
+        self.driver.find_element_by_id("confirm_password").send_keys(
+            "password-won't-match")
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(5)
 
-            # Assert error message is shown
-            error_message = self.driver.find_element_by_class_name(
-                "help-block").text 
-            assert "Field must be equal to confirm_password" in error_message 
+        # Assert error message is shown
+        error_message = self.driver.find_element_by_class_name(
+            "help-block").text 
+        assert "Field must be equal to confirm_password" in error_message
+
+class TestLogin(TestBase):
+
+    def test_login(self):
+        """
+        Test that a user can login and that they will be redirected to
+        the homepage
+        """
+
+        # Click login menu link
+        self.driver.find_element_by_id("login_link").click()
+        time.sleep(1)
+
+        # Fill in login form 
+        self.driver.find_element_by_id("email").send_keys(test_employee1_email)
+        self.driver.find_element_by_id("password").send_keys(
+            test_employee1_password)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+
+        # Assert that browser redirects to dashboard page
+        assert url_for('home.dashboard') in self.driver.current_url
+
+        # Assert that welcome greeting is shown
+        username_greeting = self.driver.find_element_by_id(
+            "username_greeting").text
+        assert "Hi, employee1!" in username_greeting
+
+    def test_admin_login(self):
+        """
+        Test that an admin user can login and that they will be redirected to
+        the admin homepage 
+        """
+
+        # Click login menu link
+        self.driver.find_element_by_id("login_link").click()
+        time.sleep(1)
+
+        # Fill in login form
+        self.driver.find_element_by_id("email").send_keys(test_admin_email)
+        self.driver.find_element_by_id("password").send_keys(
+            test_admin_password)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+
+        # Assert that browser redirects to dashboard page
+        assert url_for('home.admin_dashboard') in self.driver.current_url
+
+        # Assert that welcome greeting is shown
+        username_greeting = self.driver.find_element_by_id(
+            "username_greeting").text
+        assert "Hi, admin!" in username_greeting
+
+    def test_login_invalid_email_format(self):
+        """
+        Test that a user cannot login using an invalid email format
+        and that an appropriate error message will be dispalyed
+        """
+
+        # Click login menu link
+        self.driver.find_element_by_id("login_link").click()
+        time.sleep(1)
+
+        # Fill in login form
+        self.driver.find_element_by_id("email").send_keys("invalid")
+        self.driver.find_element_by_id("password").send_keys(
+            test_employee1_password)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+
+        # Assert error message is shown
+        error_message = self.driver.find_element_by_class_name(
+            "help-block").text
+        assert "Invalid email address" in error_message
+
+    def test_login_wrong_email(self):
+        """
+        Test that a user cannot login using wrong email 
+        and that an appropriate error message will be displayed
+        """
+
+        # Click login menu link
+        self.driver.find_element_by_id("login_link").click()
+        time.sleep(1)
+
+        # Fill in login form
+        self.driver.find_element_by_id("email").send_keys(test_employee2_email)
+        self.driver.find_element_by_id("password").send_keys(
+            test_employee1_password)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+
+        # Assert that error message is shown
+        error_message = self.driver.find_element_by_class_name("alert").text
+        assert "Invalid email or password" in error_message
+
+    def test_login_wrong_password(self):
+        """
+        Test that a user cannot login using the wrong password
+        and that an appropriate error message will be displayed
+        """
+
+        # Click login menu link
+        self.driver.find_element_by_id("login_link").click()
+        time.sleep(1)
+
+        # Fill in login form
+        self.driver.find_element_by_id("email").send_keys(test_employee1_email)
+        self.driver.find_element_by_id("password").send_keys("invalid")
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+
+        # Assert that error message is shown
+        error_message = self.driver.find_element_by_class_name("alert").text
+        assert "Invalid email or password" in error_message
 
 if __name__ == '__main__':
     unittest.main()
