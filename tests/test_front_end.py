@@ -46,6 +46,24 @@ test_role1_description = "Lead the entire department"
 test_role2_name = "Intern"
 test_role2_description = "3-Month learning position"
 
+class CreateObjects(object):
+
+    def login_admin_user(self):
+        """Log in as the test admin"""
+        login_link = self.get_server_url() + url_for('auth,login')
+        self.driver.get(login_link)
+        self.driver.find_element_by_id("password").send_keys(
+            test_admin_password)
+        self.driver.find_element_by_id("submit").click()
+
+    def login_test_user(self):
+        """Log in as the test employee"""
+        login_link = self.get_server_url() + url_for('auth.login')
+        self.driver.get(login_link)
+        self.driver.find_element_by_id("email").send_keys(test_employee1_email)
+        self.driver.find_element_by_id("password").send_keys(test_employee1_password)
+        self.driver.find_element_by_id("submit").click()
+
 class TestBase(LiveServerTestCase):
     def create_app(self):
         config_name = 'testing'
