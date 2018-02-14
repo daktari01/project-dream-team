@@ -7,6 +7,7 @@ import time
 from flask import url_for
 from flask_testing import LiveServerTestCase
 from selenium import webdriver
+from selenium.webdriver.support.ui import Select
 
 from app import create_app, db
 from app.models import Employee, Role, Department
@@ -569,10 +570,89 @@ class TestRole(CreateObjects, TestBase):
         
         # Assert success message is shown
         success_message = self.driver.find_element_by_class_name("alert").text 
-        assert "Yu have successfully deleted the role" in success_message
+        assert "You have successfully deleted the role" in success_message
         
         # Assert there are no roles in the database
         self.assertEqual(Role.query.count(), 0)
+        
+    class TestEmployees(CreateObjects, TestBase):
+        
+        def test_assign(self):
+            """
+            Test that an admin user can assign a role and a department 
+            to an employee
+            """
+            
+            # Login as admin user
+            self.login_admin_user()
+            
+            # Click employees menu link
+            self.driver.find_element_by_id("employees_link").click()
+            time.sleep(1)
+            
+            # Click on assign link
+            self.driver.find_element_by_class_name("fa-user-plus").click()
+            time.sleep(1)
+            
+            # Department and role already loaded in form
+            self.driver.find_element_by_id("submit").click()
+            time.sleep(2)
+            
+            # Assert success message is shown
+            success_message = self.driver.find_element_by_class_name(
+                "alert").text
+            assert "You have successfully assigned a department and a role" in success_message
+            
+            # Assert that department and role have been assigned to employee
+            employee = Employee.query.get(2)
+            self.assertEqual(employee.role.name, test_role1_name)
+            self.assertEqual(employee.department.name, test_department1_name)
+            
+        def test_reassign(self):
+            """
+            Test that an admin user can reassign a new role and a new 
+            department to an employee
+            """
+            # Create new department
+            department = Department(name=test_department2_name, 
+                                description=test_department2_description)
+                                
+            # Create new role
+            role = Role(name=test_role2_name, 
+                    description=test_role2_description)
+                    
+            # Add to database
+            db.session.add(department)
+            db.session.add(role)
+            db.session.commit()
+            
+            # Login as admin user
+            self.login_admin_user()
+            
+            # Click employees menu link
+            self.driver.find_element_by_id("employees_link").click()
+            time.sleep(1)
+            
+            # Click on assign link
+            self.driver.find_element_by_class_name("fa-user-plus").click()
+            time.sleep(1)
+            
+            # Select new department and role
+            select_dept = Select(self.driver.find_element_by_id("department"))
+            select_dept.select_by_visible_text(test_department2_name)
+            select_role = Select(self.driver.find_element_by_id("role"))
+            select_role.select_by_visible_text(test_role2_name)
+            self.driver.find_element_by_id("submit").click()
+            time.sleep(2)
+            
+            # Assert success message is shown
+            success_message = self.driver.find_element_by_class_name("alert").text 
+            assert "You have successfully assigned a department and a role" in success_message
+            
+            # Assert that employee's role and department have changed
+            employee = Employee.query.get(2)
+            self.assertEqual(employee.role.name, test_role2_name)
+            self.assertEqual(employee.department.name, test_department2_name)
 
 if __name__ == '__main__':
     unittest.main()
