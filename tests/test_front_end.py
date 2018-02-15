@@ -692,7 +692,7 @@ class TestPermissions(CreateObjects, TestBase):
         error_text = self.driver.find_element_by_css_selector("h3").text 
         assert "You do not have sufficient permissions" in error_text
         
-    def test_permissions_add_departments_page(self):
+    def test_permissions_add_department_page(self):
         """
         Test that non-admin users cannot access add departments page
         """
@@ -705,6 +705,42 @@ class TestPermissions(CreateObjects, TestBase):
         self.driver.get(target_url)
         
         # Assert 403 error page is shown
+        error_title = self.driver.find_element_by_css_selector("h1").text 
+        self.assertEqual("403 Error", error_title)
+        error_text = self.driver.find_element_by_css_selector("h3").text 
+        assert "You do not have sufficient permissions" in error_text
+        
+    def test_permissions_list_roles_page(self):
+        """
+        Test that non admin user cannot access list roles page
+        """
+        
+        # Login as non-admin
+        self.login_test_user()
+        
+        # Navigate to admin page
+        target_url = self.get_server_url() + url_for('admin.list_roles')
+        self.driver.get(target_url)
+        
+        # Assert that 403 error is shown
+        error_title = self.driver.find_element_by_css_selector("h1").text 
+        self.assertEqual("403 Error", error_title)
+        error_text = self.driver.find_element_by_css_selector("h3").text 
+        assert "You do not have sufficient permissions" in error_text
+        
+    def test_permissions_add_role_page(self):
+        """
+        Test that non admin user cannot access add role page
+        """
+        
+        # Login as non-admin
+        self.login_test_user()
+        
+        # Navigate to admin page
+        target_url = self.get_server_url() + url_for('admin.add_role')
+        self.driver.get(target_url)
+        
+        # Assert that 403 page is shown
         error_title = self.driver.find_element_by_css_selector("h1").text 
         self.assertEqual("403 Error", error_title)
         error_text = self.driver.find_element_by_css_selector("h3").text 
