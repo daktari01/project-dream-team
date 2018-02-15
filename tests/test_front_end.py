@@ -131,7 +131,6 @@ class TestRegistration(TestBase):
         if all fields are field correctly, and that they will be 
         redirected to the login page
         """
-
         # Click register menu link
         self.driver.find_element_by_id("register_link").click()
         time.sleep(1)
@@ -166,7 +165,6 @@ class TestRegistration(TestBase):
         Test that a user cannot register using an invalid email format
         and that an appropriate error message will be displayed
         """
-
         # Click register menu link
         self.driver.find_element_by_id("register_link").click()
         time.sleep(1)
@@ -196,7 +194,6 @@ class TestRegistration(TestBase):
         Test that an appropriate error message is displayed when the 
         password and confirm password fields do not match
         """
-
         # Click register menu link
         self.driver.find_element_by_id("register_link").click()
         time.sleep(1)
@@ -228,7 +225,6 @@ class TestLogin(TestBase):
         Test that a user can login and that they will be redirected to
         the homepage
         """
-
         # Click login menu link
         self.driver.find_element_by_id("login_link").click()
         time.sleep(1)
@@ -253,7 +249,6 @@ class TestLogin(TestBase):
         Test that an admin user can login and that they will be redirected to
         the admin homepage 
         """
-
         # Click login menu link
         self.driver.find_element_by_id("login_link").click()
         time.sleep(1)
@@ -278,7 +273,6 @@ class TestLogin(TestBase):
         Test that a user cannot login using an invalid email format
         and that an appropriate error message will be dispalyed
         """
-
         # Click login menu link
         self.driver.find_element_by_id("login_link").click()
         time.sleep(1)
@@ -300,7 +294,6 @@ class TestLogin(TestBase):
         Test that a user cannot login using wrong email 
         and that an appropriate error message will be displayed
         """
-
         # Click login menu link
         self.driver.find_element_by_id("login_link").click()
         time.sleep(1)
@@ -321,7 +314,6 @@ class TestLogin(TestBase):
         Test that a user cannot login using the wrong password
         and that an appropriate error message will be displayed
         """
-
         # Click login menu link
         self.driver.find_element_by_id("login_link").click()
         time.sleep(1)
@@ -342,7 +334,6 @@ class TestDepartments(CreateObjects, TestBase):
         """
         Test that an admin user can add a department
         """
-
         # Login as admin user
         self.login_admin_user()
 
@@ -373,7 +364,6 @@ class TestDepartments(CreateObjects, TestBase):
         Test that an admin user cannot add a department with a name 
         that already exists
         """
-
         # Login as admin user
         self.login_admin_user()
 
@@ -402,7 +392,6 @@ class TestDepartments(CreateObjects, TestBase):
         """
         Test that an admin user can edit a department
         """
-
         # Login as admin user
         self.login_admin_user()
 
@@ -436,7 +425,6 @@ class TestDepartments(CreateObjects, TestBase):
         """
         Test that an admin user can delete a department
         """
-
         # Login as admin user
         self.login_admin_user()
 
@@ -461,7 +449,6 @@ class TestRole(CreateObjects, TestBase):
         """
         Test that an admin user can add a role
         """
-        
         # Login as admin
         self.login_admin_user()
         
@@ -492,7 +479,6 @@ class TestRole(CreateObjects, TestBase):
         Test that admin cannot add a role with a name
         that already exists
         """
-        
         # Login as admin
         self.login_admin_user
         
@@ -522,7 +508,6 @@ class TestRole(CreateObjects, TestBase):
         """
         Test that an admin user can edit a role
         """
-        
         # Login as admin user
         self.login_admin_user()
         
@@ -556,7 +541,6 @@ class TestRole(CreateObjects, TestBase):
         """
         Test that admin user can delete a role
         """
-        
         # Login as admin user
         self.login_admin_user()
         
@@ -582,7 +566,6 @@ class TestEmployees(CreateObjects, TestBase):
         Test that an admin user can assign a role and a department 
         to an employee
         """
-        
         # Login as admin user
         self.login_admin_user()
         
@@ -660,7 +643,6 @@ class TestPermissions(CreateObjects, TestBase):
         """
         Test that non admin users cannot access the admin dashboard
         """
-        
         # Login as non-admin user
         self.login_test_user()
         
@@ -678,7 +660,6 @@ class TestPermissions(CreateObjects, TestBase):
         """
         Test that non admin users cannot access the list departments page
         """
-        
         # Login as non-admin user
         self.login_test_user()
         
@@ -696,7 +677,6 @@ class TestPermissions(CreateObjects, TestBase):
         """
         Test that non-admin users cannot access add departments page
         """
-        
         # Login as non-admin
         self.login_test_user()
         
@@ -714,7 +694,6 @@ class TestPermissions(CreateObjects, TestBase):
         """
         Test that non admin user cannot access list roles page
         """
-        
         # Login as non-admin
         self.login_test_user()
         
@@ -732,7 +711,6 @@ class TestPermissions(CreateObjects, TestBase):
         """
         Test that non admin user cannot access add role page
         """
-        
         # Login as non-admin
         self.login_test_user()
         
@@ -745,6 +723,40 @@ class TestPermissions(CreateObjects, TestBase):
         self.assertEqual("403 Error", error_title)
         error_text = self.driver.find_element_by_css_selector("h3").text 
         assert "You do not have sufficient permissions" in error_text
+
+    def test_permissions_list_employees_page(self):
+        """
+        Test that non-admin users cannot access the list employees page
+        """
+        # Login as non-admin user
+        self.login_test_user()
+
+        # Navigate to admin dashboard
+        target_url = self.get_server_url() + url_for('admin.list_employees')
+        self.driver.get(target_url)
+
+        # Assert 403 error page is shown
+        error_title = self.driver.find_element_by_css_selector("h1").text
+        self.assertEqual("403 Error", error_title)
+        error_text = self.driver.find_element_by_css_selector("h3").text
+        assert "You do not have sufficient permissions" in error_text
+
+    def test_permissions_assign_employee_page(self):
+        """
+        Test that non admin users cannot access the assign employee page
+        """
+        # Login as non-admin user
+        self.login_test_user()
+
+        # Navigate to admin dashboard
+        target_url = self.get_server_url() + url_for('admin.assign_employee', id=1)
+        self.driver.get(target_url)
+
+        # Assert that 403 error page is shown
+        error_title = self.driver.find_element_by_css_selector("h1").text
+        self.assertEqual("403 Error", error_title)
+        error_text = self.driver.find_element_by_css_selector("h3").text
+        assert "You do have sufficient permissions" in error_text
 
 if __name__ == '__main__':
     unittest.main()
