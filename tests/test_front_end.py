@@ -575,84 +575,140 @@ class TestRole(CreateObjects, TestBase):
         # Assert there are no roles in the database
         self.assertEqual(Role.query.count(), 0)
         
-    class TestEmployees(CreateObjects, TestBase):
+class TestEmployees(CreateObjects, TestBase):
+    
+    def test_assign(self):
+        """
+        Test that an admin user can assign a role and a department 
+        to an employee
+        """
         
-        def test_assign(self):
-            """
-            Test that an admin user can assign a role and a department 
-            to an employee
-            """
-            
-            # Login as admin user
-            self.login_admin_user()
-            
-            # Click employees menu link
-            self.driver.find_element_by_id("employees_link").click()
-            time.sleep(1)
-            
-            # Click on assign link
-            self.driver.find_element_by_class_name("fa-user-plus").click()
-            time.sleep(1)
-            
-            # Department and role already loaded in form
-            self.driver.find_element_by_id("submit").click()
-            time.sleep(2)
-            
-            # Assert success message is shown
-            success_message = self.driver.find_element_by_class_name(
-                "alert").text
-            assert "You have successfully assigned a department and a role" in success_message
-            
-            # Assert that department and role have been assigned to employee
-            employee = Employee.query.get(2)
-            self.assertEqual(employee.role.name, test_role1_name)
-            self.assertEqual(employee.department.name, test_department1_name)
-            
-        def test_reassign(self):
-            """
-            Test that an admin user can reassign a new role and a new 
-            department to an employee
-            """
-            # Create new department
-            department = Department(name=test_department2_name, 
-                                description=test_department2_description)
-                                
-            # Create new role
-            role = Role(name=test_role2_name, 
-                    description=test_role2_description)
-                    
-            # Add to database
-            db.session.add(department)
-            db.session.add(role)
-            db.session.commit()
-            
-            # Login as admin user
-            self.login_admin_user()
-            
-            # Click employees menu link
-            self.driver.find_element_by_id("employees_link").click()
-            time.sleep(1)
-            
-            # Click on assign link
-            self.driver.find_element_by_class_name("fa-user-plus").click()
-            time.sleep(1)
-            
-            # Select new department and role
-            select_dept = Select(self.driver.find_element_by_id("department"))
-            select_dept.select_by_visible_text(test_department2_name)
-            select_role = Select(self.driver.find_element_by_id("role"))
-            select_role.select_by_visible_text(test_role2_name)
-            self.driver.find_element_by_id("submit").click()
-            time.sleep(2)
-            
-            # Assert success message is shown
-            success_message = self.driver.find_element_by_class_name("alert").text 
-            assert "You have successfully assigned a department and a role" in success_message
-            
-            # Assert that employee's role and department have changed
-            employee = Employee.query.get(2)
-            self.assertEqual(employee.role.name, test_role2_name)
-            self.assertEqual(employee.department.name, test_department2_name)
+        # Login as admin user
+        self.login_admin_user()
+        
+        # Click employees menu link
+        self.driver.find_element_by_id("employees_link").click()
+        time.sleep(1)
+        
+        # Click on assign link
+        self.driver.find_element_by_class_name("fa-user-plus").click()
+        time.sleep(1)
+        
+        # Department and role already loaded in form
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+        
+        # Assert success message is shown
+        success_message = self.driver.find_element_by_class_name(
+            "alert").text
+        assert "You have successfully assigned a department and a role" in success_message
+        
+        # Assert that department and role have been assigned to employee
+        employee = Employee.query.get(2)
+        self.assertEqual(employee.role.name, test_role1_name)
+        self.assertEqual(employee.department.name, test_department1_name)
+        
+    def test_reassign(self):
+        """
+        Test that an admin user can reassign a new role and a new 
+        department to an employee
+        """
+        # Create new department
+        department = Department(name=test_department2_name, 
+                            description=test_department2_description)
+                            
+        # Create new role
+        role = Role(name=test_role2_name, 
+                description=test_role2_description)
+                
+        # Add to database
+        db.session.add(department)
+        db.session.add(role)
+        db.session.commit()
+        
+        # Login as admin user
+        self.login_admin_user()
+        
+        # Click employees menu link
+        self.driver.find_element_by_id("employees_link").click()
+        time.sleep(1)
+        
+        # Click on assign link
+        self.driver.find_element_by_class_name("fa-user-plus").click()
+        time.sleep(1)
+        
+        # Select new department and role
+        select_dept = Select(self.driver.find_element_by_id("department"))
+        select_dept.select_by_visible_text(test_department2_name)
+        select_role = Select(self.driver.find_element_by_id("role"))
+        select_role.select_by_visible_text(test_role2_name)
+        self.driver.find_element_by_id("submit").click()
+        time.sleep(2)
+        
+        # Assert success message is shown
+        success_message = self.driver.find_element_by_class_name("alert").text 
+        assert "You have successfully assigned a department and a role" in success_message
+        
+        # Assert that employee's role and department have changed
+        employee = Employee.query.get(2)
+        self.assertEqual(employee.role.name, test_role2_name)
+        self.assertEqual(employee.department.name, test_department2_name)
+        
+class TestPermissions(CreateObjects, TestBase):
+    
+    def test_permissions_admin_dashboard(self):
+        """
+        Test that non admin users cannot access the admin dashboard
+        """
+        
+        # Login as non-admin user
+        self.login_test_user()
+        
+        # Navigate to admin dashboard
+        target_url = self.get_server_url() + url_for('home.admin_dashboard')
+        self.driver.get(target_url)
+        
+        # Assert 403 error page is shown
+        error_title = self.driver.find_element_by_css_selector("h1").text 
+        self.assertEqual("403 Error", error_title)
+        error_text = self.driver.find_element_by_css_selector("h3").text 
+        assert "You do not have sufficient permissions" in error_text
+        
+    def test_permissions_list_departments_page(self):
+        """
+        Test that non admin users cannot access the list departments page
+        """
+        
+        # Login as non-admin user
+        self.login_test_user()
+        
+        # Navigate to the admin dashboard
+        target_url = self.get_server_url() + url_for('admin.list_departments')
+        self.driver.get(target_url)
+        
+        # Assert that 403 error page is shown
+        error_title = self.driver.find_element_by_css_selector("h1").text 
+        self.assertEqual("403 Error", error_title)
+        error_text = self.driver.find_element_by_css_selector("h3").text 
+        assert "You do not have sufficient permissions" in error_text
+        
+    def test_permissions_add_departments_page(self):
+        """
+        Test that non-admin users cannot access add departments page
+        """
+        
+        # Login as non-admin
+        self.login_test_user()
+        
+        # Navigate to admin dashboard
+        target_url = self.get_server_url() + url_for('admin.add_department')
+        self.driver.get(target_url)
+        
+        # Assert 403 error page is shown
+        error_title = self.driver.find_element_by_css_selector("h1").text 
+        self.assertEqual("403 Error", error_title)
+        error_text = self.driver.find_element_by_css_selector("h3").text 
+        assert "You do not have sufficient permissions" in error_text
 
 if __name__ == '__main__':
     unittest.main()
