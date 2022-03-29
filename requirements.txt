@@ -40,7 +40,7 @@ nose2==0.7.3
 numpy==1.8.2
 oauth==1.0.1
 pam==0.1.4
-paramiko==1.10.1
+paramiko==2.10.1
 pexpect==3.1
 pycrypto==2.6.1
 pygobject==3.12.0
