@@ -50,7 +50,7 @@ python-apt==0.9.3.5ubuntu2
 python-dateutil==1.5
 python-editor==1.0.3
 pytz==2012c
-requests==2.2.1
+requests==2.20.0
 scipy==0.13.3
 selenium==3.9.0
 simplegeneric==0.8.1
